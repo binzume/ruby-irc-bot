@@ -1,0 +1,73 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<link rel=stylesheet type="text/css" href="css/form.css" />
+	<link rel=stylesheet type="text/css" href="css/list.css" />
+	<link rel=stylesheet type="text/css" href="css/header.css" />
+	<link rel=stylesheet type="text/css" href="css/layout_simple.css" />
+	<title>Bot Manager</title>
+	<script src="js/lib.js"></script>
+	<script src="js/bot_config.js"></script>
+</head>
+<body>
+
+<div id="content">
+
+Bot Manager
+
+<ul class="tab">
+ <li><a href="index.html">Log</a></li>
+ <li><a href="channels.html">Channels</a></li>
+ <li><a href="irc_servers.html">IRC Servers</a></li>
+ <li  class="sel"><a href="bot_config.html">IRC Servers</a></li>
+</ul>
+
+
+<fieldset class="group">
+<legend>Bot Profile</legend>
+
+<p>
+names (comma separeted):
+<input type="text" />
+</p>
+
+
+<button class="attach_right">Preview</button><button class="submit">Update</button>
+
+</fieldset>
+
+
+<fieldset class="group">
+<legend>Keywords</legend>
+
+
+<ul id="keywords" class="simple">
+</ul>
+
+
+
+<button class="attach_right">Preview</button><button class="submit">Update</button>
+
+</fieldset>
+
+
+<fieldset class="group">
+<legend>Cron</legend>
+
+
+<ul id="cron" class="simple">
+</ul>
+
+
+
+<button class="attach_right">Preview</button><button class="submit">Update</button>
+
+</fieldset>
+
+
+</div>
+
+</body>
+</html>
+
+

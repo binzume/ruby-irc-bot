@@ -1,0 +1,74 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<link rel=stylesheet type="text/css" href="css/form.css" />
+	<link rel=stylesheet type="text/css" href="css/list.css" />
+	<link rel=stylesheet type="text/css" href="css/header.css" />
+	<link rel=stylesheet type="text/css" href="css/layout_simple.css" />
+	<script src="js/lib.js"></script>
+	<script src="js/servers.js"></script>
+	<title>Bot Manager</title>
+</head>
+<body>
+
+<div id="content">
+
+Bot Manager
+
+<ul class="tab">
+ <li><a href="index.html">Log</a></li>
+ <li><a href="channels.html">Channels</a></li>
+ <li  class="sel"><a href="irc_servers.html">IRC Servers</a></li>
+</ul>
+
+
+<fieldset class="group">
+<legend>Servers</legend>
+
+<select id="servers"></select><button id="create_button">+New</button>
+
+<p>
+ID: <span id="irc_id"></span>
+<button id="delete_button" class="careful">Delete</button> <br />
+Status: <span id="status"></span> <br />
+</p>
+
+<form id="irc_server_form">
+
+<p>
+server (host:port):
+<input id="irc_server" name="irc_server" type="text" /><input id="irc_ssl" name="irc_ssl" type="checkbox" />SSL</label>
+</p>
+
+<p>
+nickname:
+<input id="irc_nick" name="irc_nick" type="text" />
+</p>
+
+<p>
+real name:
+<input id="irc_name" name="irc_name" type="text" />
+</p>
+
+<p>
+user:
+<input id="irc_user" name="irc_user" type="text" />
+</p>
+
+<p>
+pass(opt):
+<input id="irc_pass" name="irc_pass" type="text" />
+</p>
+
+</form>
+
+<button id="disconnect_button" class="attach_right">Disconnect</button><button id="update_button" class="submit">Update</button>
+
+</fieldset>
+
+</div>
+
+</body>
+</html>
+
+

@@ -1,0 +1,4 @@
+/tmp/*
+/conf/servers.json
+/.bundle
+/vendor/bundle
