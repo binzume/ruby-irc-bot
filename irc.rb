@@ -33,7 +33,7 @@ class IrcServer
 
   def connect
     host = @config["server"].split(':')[0]
-    port = (@config['server'].split(':')[1]||6664).to_i
+    port = (@config['server'].split(':')[1]||6667).to_i
     @client = IrcClient.new(host, port, {
                   :nick => @config['nick'],
                   :user => @config['user'],

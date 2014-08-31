@@ -79,6 +79,7 @@ class IrcBotWeb < Sinatra::Base
       "name" => params["irc_name"],
       "user" => params["irc_user"],
       "pass" => params["irc_pass"].empty? ? nil : params["irc_pass"],
+      "channels" => []
     }
     s = IrcServer.new(config)
     settings.servers << s
