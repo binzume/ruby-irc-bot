@@ -74,6 +74,7 @@ class IrcBotWeb < Sinatra::Base
   post '/api/servers/-create' do
     config = {
       "server" => params["irc_server"],
+      "use_ssl" => params["irc_use_ssl"] == "on",
       "nick" => params["irc_nick"],
       "name" => params["irc_name"],
       "user" => params["irc_user"],
@@ -88,6 +89,7 @@ class IrcBotWeb < Sinatra::Base
     s = settings.servers.find{|s| s.id == params[:id] }
     if s
       s.config["nick"] = params["irc_nick"]
+      s.config["use_ssl"] = params["irc_use_ssl"] == "on",
       s.config["name"] = params["irc_name"]
       s.config["user"] = params["irc_user"]
       s.config["pass"] = params["irc_pass"].empty? ? nil : params["irc_pass"]
@@ -121,10 +123,13 @@ end
 
 
 # IRC
-servers = open("conf/servers.json") {|f|
-  JSON.parse(f.read)
-}
-#puts JSON.pretty_generate(servers)
+servers = if File.exist?("conf/servers.json")
+  open("conf/servers.json") {|f|
+    JSON.parse(f.read)
+  }
+else
+  {"servers" => []}
+end
 irc_servers = irc_connect servers["servers"], bot
 
 # web

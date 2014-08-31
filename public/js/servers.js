@@ -6,6 +6,7 @@ function displayServer(id) {
     var s = servers[id];
     document.getElementById('status').innerText = s.connected ? "CONNECTED" : "CLOSED";
     document.getElementById('irc_id').innerText = s.id;
+    document.getElementById('irc_use_ssl').checked = s.use_ssl;
     document.getElementById('irc_server').value = s.server;
     document.getElementById('irc_nick').value = s.nick;
     document.getElementById('irc_name').value = s.name;

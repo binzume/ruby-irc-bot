@@ -39,6 +39,7 @@ class IrcServer
                   :user => @config['user'],
                   :real => @config['name'],
                   :pass => @config['pass'],
+                  :use_ssl => @config['use_ssl'],
                 })
     @config["channels"].each{|ch|
       @client.add_channel(ch)
@@ -135,6 +136,19 @@ class IrcClient < Net::IRC::Client
 
   def send_notice(msg)
     post(NOTICE, @channels[0], msg)
+  end
+
+  def on_connected
+    if @opts.use_ssl
+      puts "Using SSL"
+      require 'openssl'
+      ssl_context = OpenSSL::SSL::SSLContext.new
+      # ssl_context.verify_mode = OpenSSL::SSL::VERIFY_NONE
+      @socket = OpenSSL::SSL::SSLSocket.new(@socket, ssl_context)
+      @socket.sync = true
+      @socket.connect
+    end
+    super
   end
 
   def finish

@@ -2,6 +2,7 @@
   "servers": [
     {
       "server": "irc.example.com:6664",
+      "use_ssl": false,
       "jis_encode": true,
       "user": "_bot_test@example.com",
       "nick": "_bot_tes",
