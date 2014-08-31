@@ -56,6 +56,7 @@ class IrcServer
 end
 
 class IrcChannel < Channel
+  include Net::IRC::Constants
 
   def initialize(name, client)
     @type = 'IRC'
@@ -65,16 +66,16 @@ class IrcChannel < Channel
   end
 
   def send msg
-    @client.post('NOTICE', name, msg)
+    @client.post(NOTICE, @name, msg)
   end
 
   def leave
-    @client.post('LEAVE', name)
+    @client.post(LEAVE, @name)
+    @connected = false
   end
 
   def request_names
-    @client.post('NAMES', name)
-    @connected = false
+    @client.post(NAMES, @name)
   end
 
 end
@@ -101,7 +102,7 @@ class IrcClient < Net::IRC::Client
   end
 
   def on_message(m)
-    p m
+    #p m
     if m.command == JOIN
       ch = @channels[m[0]] || IrcChannel.new(m[0],self)
       ch.connected = true
@@ -127,8 +128,9 @@ class IrcClient < Net::IRC::Client
   end
 
   def on_privmsg(m)
+    ch = @channels[m[0]] || IrcChannel.new(m[0],self)
     # m = [channel, message]
-    @bot.on_message(m[0].toutf8, m.prefix, m[1].toutf8)
+    @bot.on_message(ch, m[1].toutf8, m.prefix)
   end
 
   def send_notice(msg)
@@ -141,6 +143,10 @@ class IrcClient < Net::IRC::Client
     @channels.each_value {|ch|
       @bot.on_leave(ch) if @bot
     }
+    super
+  end
+
+  def post(command, *params)
     super
   end
 end

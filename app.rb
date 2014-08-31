@@ -3,8 +3,6 @@
 
 require 'sinatra/base'
 require 'json'
-require 'digest/md5'
-
 require_relative 'bot'
 require_relative 'irc'
 
@@ -126,7 +124,7 @@ end
 servers = open("conf/servers.json") {|f|
   JSON.parse(f.read)
 }
-puts JSON.pretty_generate(servers)
+#puts JSON.pretty_generate(servers)
 irc_servers = irc_connect servers["servers"], bot
 
 # web

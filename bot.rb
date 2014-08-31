@@ -28,10 +28,13 @@ class Bot
     log "Start."
   end
 
-  def on_message ch,prefix,message
-    log "#{ch}, #{prefix} : #{message}"
+  def on_message ch, message, from
+    log "#{ch.name}, #{from} : #{message}"
     if message =~/debug_conf/
       debug_conf
+    end
+    if message =~/foo/
+      ch.send("bar")
     end
   end
 
@@ -49,7 +52,7 @@ class Bot
 
   def debug_conf
     if @channels.length > 0
-      @conf.channels = @channels.map{|c|c.name}
+      @conf["channels"] = @channels.map{|c|c.name}
     end
     puts JSON.pretty_generate(@conf)
   end
