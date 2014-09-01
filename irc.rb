@@ -58,20 +58,22 @@ end
 
 class IrcChannel < Channel
   include Net::IRC::Constants
+  attr_reader :client
 
   def initialize(name, client)
     @type = 'IRC'
     @name = name
     @client = client
     @connected = true
+    @members = Set.new
   end
 
   def send msg
-    @client.post(NOTICE, @name, msg)
+    @client.post(NOTICE, @name, msg) if @connected
   end
 
   def leave
-    @client.post(LEAVE, @name)
+    @client.post('LEAVE', @name)
     @connected = false
   end
 
@@ -103,24 +105,47 @@ class IrcClient < Net::IRC::Client
   end
 
   def on_message(m)
+    @bot.on_irc_message(m) if @bot
     #p m
-    if m.command == JOIN
-      ch = @channels[m[0]] || IrcChannel.new(m[0],self)
+    if m.command == JOIN && m.prefix == @prefix
+      ch = channel(m[0])
       ch.connected = true
-      @channels[m[0]] = ch
       @bot.on_join(ch) if @bot
     end
+    if m.command == JOIN && m.prefix != @prefix
+      ch = channel(m[0])
+      ch.members.add(m.prefix.nick)
+      @bot.on_join_user(ch, m.prefix.nick) if @bot
+    end
+    if m.command == PART && m.prefix != @prefix
+      ch = channel(m[0])
+      ch.members.delete(m.prefix.nick)
+      @bot.on_part_user(ch, m.prefix.nick) if @bot
+    end
     if m.command == KICK
-      ch = @channels[m[0]] || IrcChannel.new(m[0],self)
+      ch = channel(m[0])
       ch.connected = false
       @bot.on_leave(ch) if @bot
     end
     if m.command == INVITE
       post JOIN, m[1] if @auto_join
     end
+    if m.command == RPL_NAMREPLY
+      ch = channel(m[2])
+      m.params[3].split(/\s/).each{|n|
+        ch.members << n.gsub(/[+@:]/,"")
+      }
+    end
+  end
+
+  def channel name
+      ch = @channels[name] || IrcChannel.new(name,self)
+      @channels[name] = ch
+      ch
   end
 
   def on_rpl_welcome(m)
+    super
     @channels.each_value {|ch|
       post JOIN, ch.name
     }
@@ -152,7 +177,12 @@ class IrcClient < Net::IRC::Client
   end
 
   def finish
-    post(QUIT) if @connected
+    begin
+      post(QUIT) if @connected
+    rescue Exception => e
+        warn e
+        warn e.backtrace.join("\r\t")
+    end
     @connected = false
     @channels.each_value {|ch|
       @bot.on_leave(ch) if @bot

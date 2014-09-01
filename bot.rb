@@ -2,7 +2,7 @@ require 'json'
 require 'time'
 
 class Channel
-  attr_reader :name, :type
+  attr_reader :name, :type, :members
   attr_accessor :connected
 
   def send msg
@@ -19,9 +19,15 @@ class Bot
     @channels = []
     @logs = []
     @max_logs = 1000
-    @conf = open("conf/bot.json") {|f|
-      JSON.parse(f.read)
-    }
+    @conf = if File.exist?("conf/bot.json")
+      open("conf/bot.json") {|f|
+        JSON.parse(f.read)
+      }
+    end
+  end
+
+  def channels
+    @channels
   end
 
   def on_start
@@ -30,9 +36,6 @@ class Bot
 
   def on_message ch, message, from
     log "#{ch.name}, #{from} : #{message}"
-    if message =~/debug_conf/
-      debug_conf
-    end
     if message =~/foo/
       ch.send("bar")
     end
@@ -50,15 +53,13 @@ class Bot
   def on_tick
   end
 
-  def debug_conf
-    if @channels.length > 0
-      @conf["channels"] = @channels.map{|c|c.name}
-    end
-    puts JSON.pretty_generate(@conf)
+  def on_join_user ch, nick
   end
 
-  def channels
-    @channels
+  def on_part_user ch, nick
+  end
+
+  def on_irc_message m
   end
 
   def log msg
