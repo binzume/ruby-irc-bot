@@ -73,7 +73,7 @@ class IrcChannel < Channel
   end
 
   def leave
-    @client.post('LEAVE', @name)
+    @client.post(PART, @name)
     @connected = false
   end
 
@@ -85,6 +85,7 @@ end
 
 class IrcClient < Net::IRC::Client
   attr :connected
+  attr_reader :channels
 
 
   def initialize(*args)
@@ -116,6 +117,11 @@ class IrcClient < Net::IRC::Client
       ch = channel(m[0])
       ch.members.add(m.prefix.nick)
       @bot.on_join_user(ch, m.prefix.nick) if @bot
+    end
+    if m.command == PART && m.prefix == @prefix
+      ch = channel(m[0])
+      ch.connected = false
+      @bot.on_leave(ch) if @bot
     end
     if m.command == PART && m.prefix != @prefix
       ch = channel(m[0])

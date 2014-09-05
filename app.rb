@@ -20,7 +20,17 @@ class IrcBotWeb < Sinatra::Base
   end
 
   get '/api/channels' do
-    {:status => 'ok', :channels => settings.bot.channels.map{|c|{:id => 0, :name => c.name, :type => c.type, :connected => c.connected}} }.to_json
+    channels = settings.servers.map{|s|
+      if s.client
+        s.client.channels.values.map{|c|
+          {:id => c.name, :server_id => s.id, :name => c.name, :type => c.type, :connected => c.connected}
+        }
+      else
+        []
+      end
+    }.flatten
+    p channels
+    {:status => 'ok', :channels => channels }.to_json
   end
 
   get '/api/servers' do
@@ -112,7 +122,8 @@ class IrcBotWeb < Sinatra::Base
 
 end
 
-bot = Bot.new
+require_relative 'samplebot'
+bot = SampleBot.new
 
 # tick
 t = Thread.new do

@@ -36,9 +36,6 @@ class Bot
 
   def on_message ch, message, from
     log "#{ch.name}, #{from} : #{message}"
-    if message =~/foo/
-      ch.send("bar")
-    end
   end
 
   def on_join ch
