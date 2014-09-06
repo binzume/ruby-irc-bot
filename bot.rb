@@ -1,5 +1,6 @@
 require 'json'
 require 'time'
+require_relative 'scheduler'
 
 class Channel
   attr_reader :name, :type, :members
@@ -13,11 +14,13 @@ class Channel
 end
 
 class Bot
-  attr_reader :logs
+  attr_reader :logs, :keywords, :scheduler
 
   def initialize
+    @scheduler = Scheduler.new
     @channels = []
     @logs = []
+    @keywords = []
     @max_logs = 1000
     @conf = if File.exist?("conf/bot.json")
       open("conf/bot.json") {|f|
@@ -31,7 +34,6 @@ class Bot
   end
 
   def on_start
-    log "Start."
   end
 
   def on_message ch, message, from
@@ -48,6 +50,21 @@ class Bot
   end
 
   def on_tick
+    @scheduler.each_current(Time.now) {|sch|
+      channels = if sch.channels.include?('*')
+        @channels
+      else
+        @channels.select{|ch| sch.channels.include?(ch.name) }
+      end
+      case sch.type
+      when 'EVENT'
+        on_schedule_event sch, channels
+      else
+        channels.each {|ch|
+          ch.send(sch.message) if ch.connected
+        }
+      end
+    }
   end
 
   def on_join_user ch, nick
@@ -57,6 +74,10 @@ class Bot
   end
 
   def on_irc_message m
+  end
+
+  def on_schedule_event sch, channels
+    log("Scheduled Event: #{sch.message}")
   end
 
   def log msg

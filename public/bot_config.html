@@ -3,7 +3,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<link rel=stylesheet type="text/css" href="css/form.css" />
 	<link rel=stylesheet type="text/css" href="css/list.css" />
-	<link rel=stylesheet type="text/css" href="css/header.css" />
+	<link rel=stylesheet type="text/css" href="css/dialog.css" />
 	<link rel=stylesheet type="text/css" href="css/layout_simple.css" />
 	<title>Bot Manager</title>
 	<script src="js/lib.js"></script>
@@ -15,11 +15,49 @@
 
 Bot Manager
 
+
+<div id="add_schedule_dialog" class="dialog">
+ <form id="add_schedule">
+ <h3>When ?</h3>
+  y: <input name="year" placeholder="Year" type="text" value="*" />(*/4,2001-2061,3001)<br />
+  m: <input name="month" placeholder="Month" type="text" value="*" /><br />
+  d: <input name="day" placeholder="Day" type="text" value="*" /><br />
+  hh: <input name="hour" placeholder="Hour" type="text" value="*" /><br />
+  mm: <input name="min" placeholder="Minute" type="text" value="*" /><br />
+  wd: <input name="wday" placeholder="Week Days" type="text" value="*" /><br />
+ <h3>Message</h3>
+  tpye: <select name="type"><option value="MESSAGE">MESSAGE</option><option value="EVENT">EVENT</option></select><br />
+  body: <input name="message" placeholder="Message" type="text" value="" /><br />
+  channels: <input name="channels" placeholder="Channels" type="text" value="" />(#ch1, #ch2)<br />
+ </form>
+ <div>
+  <button id="add_schedule_dialog_add" class="submit">+Add</button>
+  <button class="dialog_cancel">Cancel</button>
+ </div>
+</div>
+
+
+<div id="add_keyword_dialog" class="dialog">
+ <form id="add_keyword">
+ <h3>Kwyword</h3>
+  matcher: <select name="matcher"><option value="NORMAL">NORMAL</option></select><br />
+  word: <input name="word" placeholder="Word" type="text" value="" /><br />
+ <h3>Message</h3>
+  tpye: <select name="type"><option value="MESSAGE">MESSAGE</option><option value="EVENT">EVENT</option></select><br />
+  message: <input name="message" placeholder="Message" type="text" value="" /><br />
+ </form>
+ <div>
+  <button id="add_keyword_dialog_add" class="submit">+Add</button>
+  <button class="dialog_cancel">Cancel</button>
+ </div>
+</div>
+
+
 <ul class="tab">
  <li><a href="index.html">Log</a></li>
  <li><a href="channels.html">Channels</a></li>
  <li><a href="irc_servers.html">IRC Servers</a></li>
- <li  class="sel"><a href="bot_config.html">IRC Servers</a></li>
+ <li  class="sel"><a href="bot_config.html">Bot</a></li>
 </ul>
 
 
@@ -44,23 +82,20 @@ names (comma separeted):
 <ul id="keywords" class="simple">
 </ul>
 
-
-
-<button class="attach_right">Preview</button><button class="submit">Update</button>
+<button id="add_keyword_button">Add</button>
 
 </fieldset>
 
 
 <fieldset class="group">
-<legend>Cron</legend>
+<legend>Scheduler</legend>
 
 
-<ul id="cron" class="simple">
+<ul id="cron_list" class="simple">
 </ul>
 
 
-
-<button class="attach_right">Preview</button><button class="submit">Update</button>
+<button id="add_schedule_button">+Add</button>
 
 </fieldset>
 

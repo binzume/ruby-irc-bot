@@ -110,6 +110,60 @@ class IrcBotWeb < Sinatra::Base
     end
   end
 
+  delete '/api/servers/:id/channels/:name' do
+    s = settings.servers.find{|s| s.id == params[:id] }
+    if s && s.client
+      ch = s.client.channels.find{|ch| ch.name = params[:name]}
+      ch.leave() if ch
+      {:status => 'ok'}
+    else
+      {:status => 'error', :code => 404}
+    end
+  end
+
+  get '/api/schedules' do
+    schedules = settings.bot.scheduler.schedules.map{|s|
+      {
+        :year => s.year, :month => s.month, :day => s.day, :wday => s.wday,
+        :hour => s.hour, :min => s.min,
+        :type => s.type, :message => s.message,
+        :channels => s.channels.join(',')
+      }
+    }
+    {:status => 'ok', :schedules => schedules}.to_json
+  end
+
+  post '/api/schedules/-create' do
+    halt 400, {:status => 'error', :message => 'param: year'}.to_json unless params["year"] && params["year"]=~/^[\d,\-\*\/]+$/
+    halt 400, {:status => 'error', :message => 'param: month'}.to_json unless params["month"] && params["month"]=~/^[\d,\-\*\/]+$/
+    halt 400, {:status => 'error', :message => 'param: day'}.to_json unless params["day"] && params["day"]=~/^[\d,\-\*\/]+$/
+    halt 400, {:status => 'error', :message => 'param: wday'}.to_json unless params["wday"] && params["wday"]=~/^[\d,\-\*\/]+$/
+    halt 400, {:status => 'error', :message => 'param: channels'}.to_json unless params["channels"]
+    settings.bot.scheduler.schedule(Schedule.new({
+      :year => params["year"],
+      :month => params["month"],
+      :day => params["day"],
+      :wday => params["wday"],
+      :hour => params["hour"],
+      :min => params["min"],
+      :type => params["type"],
+      :message => params["message"],
+      :channels => params["channels"].split(','),
+    }))
+    {:status => 'ok'}.to_json
+  end
+
+  delete '/api/schedules/:id' do
+    {:status => 'err'}.to_json
+  end
+
+  get '/api/keywords/:id' do
+    #keywords = settings.bot.keywords
+    keywords = []
+    {:status => 'ok', :keywords => keywords}.to_json
+  end
+
+
   get '/*' do
     file = if params[:splat][0] == ""
       "index.html"
