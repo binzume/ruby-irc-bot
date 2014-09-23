@@ -89,7 +89,7 @@ class IrcBotWeb < Sinatra::Base
       "name" => params["irc_name"],
       "user" => params["irc_user"],
       "pass" => params["irc_pass"].empty? ? nil : params["irc_pass"],
-      "channels" => []
+      "channels" => params["irc_channels"].empty? ? [] : params["irc_channels"].split("\n").map{|c|c.strip}
     }
     s = IrcServer.new(config)
     settings.servers << s
@@ -100,10 +100,11 @@ class IrcBotWeb < Sinatra::Base
     s = settings.servers.find{|s| s.id == params[:id] }
     if s
       s.config["nick"] = params["irc_nick"]
-      s.config["use_ssl"] = params["irc_use_ssl"] == "on",
+      s.config["use_ssl"] = params["irc_use_ssl"] == "on"
       s.config["name"] = params["irc_name"]
       s.config["user"] = params["irc_user"]
       s.config["pass"] = params["irc_pass"].empty? ? nil : params["irc_pass"]
+      s.config["channels"] = params["irc_channels"].empty? ? [] : params["irc_channels"].split("\n").map{|c|c.strip}
       {:status => 'ok', :server => s.config.merge({:id => s.id, :connected => s.connected})}.to_json
     else
       {:status => 'error', :code => 404}
@@ -122,15 +123,14 @@ class IrcBotWeb < Sinatra::Base
   end
 
   get '/api/schedules' do
-    schedules = settings.bot.scheduler.schedules.map{|s|
-      {
-        :year => s.year, :month => s.month, :day => s.day, :wday => s.wday,
-        :hour => s.hour, :min => s.min,
-        :type => s.type, :message => s.message,
-        :channels => s.channels.join(',')
-      }
-    }
+    schedules = settings.bot.scheduler.schedules.map{|s| s.to_h}
     {:status => 'ok', :schedules => schedules}.to_json
+  end
+
+  get '/api/schedules/:id' do
+    schedule = settings.bot.scheduler.schedules.find{|s| s.id == params[:id] }
+    halt 404, {:status => 'NOT_FOUND', :message => 'Not Found.'}.to_json unless schedule
+    {:status => 'ok', :schedule => schedule.to_h }.to_json
   end
 
   post '/api/schedules/-create' do
@@ -146,7 +146,7 @@ class IrcBotWeb < Sinatra::Base
       :wday => params["wday"],
       :hour => params["hour"],
       :min => params["min"],
-      :type => params["type"],
+      :message_type => params["message_type"],
       :message => params["message"],
       :channels => params["channels"].split(','),
     }))
@@ -154,15 +154,43 @@ class IrcBotWeb < Sinatra::Base
   end
 
   delete '/api/schedules/:id' do
-    {:status => 'err'}.to_json
+    schedule = settings.bot.scheduler.schedules.find{|s| s.id == params[:id] }
+    halt 404, {:status => 'NOT_FOUND', :message => 'Not Found.'}.to_json unless schedule
+    settings.bot.scheduler.delete(params[:id])
+    {:status => 'ok'}.to_json
+  end
+
+  get '/api/keywords' do
+    keywords = settings.bot.keywords.keywords
+    {:status => 'ok', :keywords => keywords.map{|k|k.to_h}}.to_json
   end
 
   get '/api/keywords/:id' do
-    #keywords = settings.bot.keywords
-    keywords = []
-    {:status => 'ok', :keywords => keywords}.to_json
+    keyword = settings.bot.keywords.keywords.find{|s| s.id == params[:id] }
+    halt 404, {:status => 'NOT_FOUND', :message => 'Not Found.'}.to_json unless keyword
+    {:status => 'ok', :keyword => keyword.to_h}.to_json
   end
 
+  post '/api/keywords/-create' do
+    halt 400, {:status => 'error', :message => 'param: message'}.to_json unless params["message"]
+    halt 400, {:status => 'error', :message => 'param: channels'}.to_json unless params["channels"]
+    keyword = Keyword.new({
+      :matcher => params["matcher"],
+      :word => params["word"],
+      :message_type => params["message_type"],
+      :message => params["message"],
+      :channels => params["channels"].split(','),
+    })
+    settings.bot.keywords.register(keyword)
+    {:status => 'ok', :keyword => keyword.to_h}.to_json
+  end
+
+  delete '/api/keywords/:id' do
+    keyword = settings.bot.keywords.keywords.find{|s| s.id == params[:id] }
+    halt 404, {:status => 'NOT_FOUND', :message => 'Not Found.'}.to_json unless keyword
+    settings.bot.keywords.delete(params[:id])
+    {:status => 'ok'}.to_json
+  end
 
   get '/*' do
     file = if params[:splat][0] == ""

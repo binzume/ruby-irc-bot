@@ -18,7 +18,7 @@ Bot Manager
 
 <div id="add_schedule_dialog" class="dialog">
  <form id="add_schedule">
- <h3>When ?</h3>
+ <h3>Schedule</h3>
   y: <input name="year" placeholder="Year" type="text" value="*" />(*/4,2001-2061,3001)<br />
   m: <input name="month" placeholder="Month" type="text" value="*" /><br />
   d: <input name="day" placeholder="Day" type="text" value="*" /><br />
@@ -26,7 +26,7 @@ Bot Manager
   mm: <input name="min" placeholder="Minute" type="text" value="*" /><br />
   wd: <input name="wday" placeholder="Week Days" type="text" value="*" /><br />
  <h3>Message</h3>
-  tpye: <select name="type"><option value="MESSAGE">MESSAGE</option><option value="EVENT">EVENT</option></select><br />
+  tpye: <select name="message_type"><option value="MESSAGE">MESSAGE</option><option value="EVENT">EVENT</option></select><br />
   body: <input name="message" placeholder="Message" type="text" value="" /><br />
   channels: <input name="channels" placeholder="Channels" type="text" value="" />(#ch1, #ch2)<br />
  </form>
@@ -43,8 +43,9 @@ Bot Manager
   matcher: <select name="matcher"><option value="NORMAL">NORMAL</option></select><br />
   word: <input name="word" placeholder="Word" type="text" value="" /><br />
  <h3>Message</h3>
-  tpye: <select name="type"><option value="MESSAGE">MESSAGE</option><option value="EVENT">EVENT</option></select><br />
+  tpye: <select name="message_type"><option value="MESSAGE">MESSAGE</option><option value="EVENT">EVENT</option></select><br />
   message: <input name="message" placeholder="Message" type="text" value="" /><br />
+  channels: <input name="channels" placeholder="Channels" type="text" value="*" />(#ch1, #ch2)<br />
  </form>
  <div>
   <button id="add_keyword_dialog_add" class="submit">+Add</button>
@@ -61,7 +62,7 @@ Bot Manager
 </ul>
 
 
-<fieldset class="group">
+<fieldset class="group" style="display:none;">
 <legend>Bot Profile</legend>
 
 <p>
@@ -82,7 +83,7 @@ names (comma separeted):
 <ul id="keywords" class="simple">
 </ul>
 
-<button id="add_keyword_button">Add</button>
+<button id="add_keyword_button">+Add</button>
 
 </fieldset>
 

@@ -1,6 +1,8 @@
 require 'json'
 require 'time'
+require_relative 'confmanager'
 require_relative 'scheduler'
+require_relative 'keywords'
 
 class Channel
   attr_reader :name, :type, :members
@@ -17,10 +19,11 @@ class Bot
   attr_reader :logs, :keywords, :scheduler
 
   def initialize
-    @scheduler = Scheduler.new
+    @config = FileConfig.new("conf/config.json")
+    @scheduler = Scheduler.new(@config)
+    @keywords = Keywords.new(@config)
     @channels = []
     @logs = []
-    @keywords = []
     @max_logs = 1000
     @conf = if File.exist?("conf/bot.json")
       open("conf/bot.json") {|f|
@@ -38,6 +41,9 @@ class Bot
 
   def on_message ch, message, from
     log "#{ch.name}, #{from} : #{message}"
+    @keywords.match?(message) {|keyword|
+      _on_event keyword
+    }
   end
 
   def on_join ch
@@ -51,20 +57,28 @@ class Bot
 
   def on_tick
     @scheduler.each_current(Time.now) {|sch|
-      channels = if sch.channels.include?('*')
-        @channels
-      else
-        @channels.select{|ch| sch.channels.include?(ch.name) }
-      end
-      case sch.type
-      when 'EVENT'
-        on_schedule_event sch, channels
-      else
-        channels.each {|ch|
-          ch.send(sch.message) if ch.connected
-        }
-      end
+      _on_event sch
     }
+  end
+
+  def _on_event item
+    channels = if item.channels.include?('*')
+      @channels
+    else
+      @channels.select{|ch| item.channels.include?(ch.name) }
+    end
+    case item.message_type
+    when 'EVENT'
+      if item.is_a?(Schedule)
+        on_schedule_event item, channels
+      else
+        on_keyword_event item, channels
+      end
+    else
+      channels.each {|ch|
+        ch.send(item.message) if ch.connected
+      }
+    end
   end
 
   def on_join_user ch, nick
@@ -76,8 +90,12 @@ class Bot
   def on_irc_message m
   end
 
-  def on_schedule_event sch, channels
-    log("Scheduled Event: #{sch.message}")
+  def on_schedule_event event, channels
+    log("Scheduled Event: #{event.message}")
+  end
+
+  def on_keyword_event event, channels
+    log("Keyword Event: #{event.message}")
   end
 
   def log msg

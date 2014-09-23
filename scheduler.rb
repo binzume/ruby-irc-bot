@@ -1,16 +1,18 @@
 require 'time'
+require 'securerandom'
 
 class Schedule
-  attr_accessor :year, :month, :day, :hour, :min, :wday, :type, :message, :channels
+  attr_accessor :id, :year, :month, :day, :hour, :min, :wday, :message_type, :message, :channels
 
   def initialize(opt)
+    @id = opt[:id] || SecureRandom.uuid
     @year = opt[:year]
     @month = opt[:month]
     @day = opt[:day]
     @hour = opt[:hour]
     @min = opt[:min]
     @wday = opt[:wday]
-    @type = opt[:type]
+    @message_type = opt[:message_type]
     @message = opt[:message]
     @channels = opt[:channels]
   end
@@ -23,6 +25,11 @@ class Schedule
     ]).all?{|t,s|
       compare(t,s)
     }
+  end
+
+  def to_h
+    { id: @id, year: @year, month: @month, day: @day, hour: @hour, min: @min, wday: @wday,
+      message_type: @message_type, message: @message, channels: @channels }
   end
 
   private
@@ -46,12 +53,26 @@ end
 
 class Scheduler
   attr_accessor :schedules
-  def initialize
+  def initialize(config = nil)
     @schedules = []
+    @config = config
+    if @config
+      @schedules = @config.map_get('schedules').map{|id, sch|
+        Schedule.new(Hash[sch.map{|k, v| [k.to_sym, v] }])
+      }
+    end
   end
 
   def schedule(sch)
     @schedules << sch
+    @config.map_field_set('schedules', sch.id, sch.to_h) if @config
+    @config.save! if @config
+  end
+
+  def delete(id)
+    @schedules.delete_if{|item| item.id == id}
+    @config.map_field_del('schedules', id) if @config
+    @config.save! if @config
   end
 
   def each_current time, &block

@@ -12,6 +12,7 @@ function displayServer(id) {
     document.getElementById('irc_name').value = s.name;
     document.getElementById('irc_user').value = s.user;
     document.getElementById('irc_pass').value = s.pass || "";
+    document.getElementById('irc_channels').value = s.channels.join("\n");
 }
 
 function getData() {

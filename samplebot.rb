@@ -10,11 +10,11 @@ class SampleBot < Bot
   end
 
   def on_message ch, message, from
-    log "#{ch.name}, #{from} : #{message}"
+    super
+
     if message =~/foo/
       ch.send("bar")
     end
-
   end
 
   def on_tick
